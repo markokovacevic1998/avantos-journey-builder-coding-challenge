@@ -35,13 +35,11 @@ export function GraphContextProvider({
 
   useEffect(() => {
     async function init() {
-      // FETCH THE RAW DATA - ONCE
-      const rawData = await getRawGraphData();
+      const rawData = await getRawGraphData().catch((err) => setError(err));
+      setLoading(false);
 
-      // CLEAN THE RAW DATA BEFORE SETING
       const cleanData = cleanGraphData(rawData);
 
-      // SET THE DATA IN STATE
       setGraph(cleanData);
     }
 
