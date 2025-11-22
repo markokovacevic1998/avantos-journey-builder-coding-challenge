@@ -1,15 +1,57 @@
-import { createContext, useContext, useMemo, useState } from "react";
+"use client";
 
-export const GraphContext = createContext(null);
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { getRawGraphData } from "../lib/api/getRawGraphData";
+import { cleanGraphData } from "../lib/domain/cleanGraphData";
+import { ActionGraph, FormId, FormNode } from "../lib/domain/types";
+
+interface GraphContextValue {
+  graph: ActionGraph;
+  setGraph: (g: ActionGraph) => void;
+  loading: boolean;
+  error: string | null;
+}
+
+const defaultGraphContext: GraphContextValue = {
+  graph: { formsById: {} },
+  setGraph: () => {},
+  loading: true,
+  error: null,
+};
+
+export const GraphContext =
+  createContext<GraphContextValue>(defaultGraphContext);
 
 export function GraphContextProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [graph, setGraph] = useState({});
+  const [graph, setGraph] = useState<ActionGraph>({
+    formsById: {},
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const value = useMemo(() => ({ graph }), [graph]);
+  useEffect(() => {
+    async function init() {
+      // FETCH THE RAW DATA - ONCE
+      const rawData = await getRawGraphData();
+
+      // CLEAN THE RAW DATA BEFORE SETING
+      const cleanData = cleanGraphData(rawData);
+
+      // SET THE DATA IN STATE
+      setGraph(cleanData);
+    }
+
+    init();
+  }, []);
+
+  const value = useMemo(
+    () => ({ graph, setGraph, loading, error }),
+    [graph, setGraph, loading, error]
+  );
 
   return (
     <GraphContext.Provider value={value}>{children}</GraphContext.Provider>
