@@ -12,6 +12,7 @@ import { useState } from "react";
 import { PrefillPanel } from "../components/prefill/PrefillPanel";
 import { usePrefillConfig } from "../lib/hooks/usePrefillConfig";
 import { PrefillSelector } from "../components/prefill/PrefillSelector";
+import { FieldPrefillConfig } from "../lib/domain/prefill";
 
 export default function GraphPage() {
   const { graph, loading, error } = useGraphContext();
@@ -49,6 +50,11 @@ export default function GraphPage() {
 
   const onFormFieldClear = (fieldId: string) => {
     console.info("clear that form field", fieldId);
+  };
+
+  const onFieldSourceReplacement = (source: FieldPrefillConfig | null) => {
+    // TODO replace the value
+    // TODO close modal
   };
 
   const closeModal = () => {
@@ -99,12 +105,12 @@ export default function GraphPage() {
           />
         </Modal>
       )}
-      {activeModal === "sourceSelector" && selectedField && (
+      {activeModal === "sourceSelector" && selectedField && selectedNode && (
         // TODO implement back button to drive user back to selected Node
         <Modal onClose={closeModal}>
           <PrefillSelector
-            field={selectedField}
-            onClose={closeModal}
+            fieldId={selectedField}
+            formId={selectedNode.id}
             onSelect={(source) => {
               console.log("selected source:", source);
             }}

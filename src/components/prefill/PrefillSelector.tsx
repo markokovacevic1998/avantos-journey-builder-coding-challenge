@@ -1,94 +1,113 @@
 "use client";
 
+import { useGraphContext } from "@/src/context/GraphContext";
+import { GLOBAL_SOURCES } from "@/src/lib/domain/globalSources";
+import {
+  getAllUpstream,
+  getDirectUpstream,
+  getTransitiveUpstream,
+} from "@/src/lib/domain/graphUtils";
+import { prefillProviders } from "@/src/lib/domain/prefillProviders";
+import { useState } from "react";
+
 export function PrefillSelector({
-  field,
+  fieldId,
+  formId,
   onSelect,
-  onClose,
 }: {
-  field: string;
-  onSelect: (item: any) => void; // kasnije tipiziramo
-  onClose: () => void;
+  fieldId: string;
+  formId: string;
+  onSelect: (item: any) => void;
 }) {
+  const [expandedSource, setExpandedSource] = useState<string | null>(null);
+  const { graph } = useGraphContext();
+
+  if (!fieldId || !formId)
+    return <div className="text-slate-800">Missing field/form ID</div>;
+
+  function toggleDropdown(sourceId: string) {
+    setExpandedSource((prev) => (prev === sourceId ? null : sourceId));
+  }
+
   return (
-    <div className="p-6 bg-white rounded-xl shadow-xl w-[420px]">
-      {/* HEADER */}
+    <div className="p-6 bg-white rounded-xl shadow-xl w-[420px] text-slate-900">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-slate-800">
-          Select Prefill Source
-        </h2>
+        <h2 className="text-xl font-semibold">Select Prefill Source</h2>
       </div>
 
-      <p className="text-sm text-slate-600 mb-6">
-        Choose where the value for <strong>{field}</strong> should come from.
+      <p className="text-sm text-slate-700 mb-6">
+        Choose where the value for{" "}
+        <strong className="text-slate-900">{fieldId}</strong> should come from.
       </p>
 
-      {/* ----------------------------------------------------
-       * SECTIONS (prazno UI, spremno da se doda logika kasnije)
-       * -------------------------------------------------- */}
+      {prefillProviders.map((provider) => {
+        const forms = provider.getForms(graph, formId);
 
-      <div className="space-y-6">
-        {/* DIRECT UPSTREAM SECTION */}
-        <div>
-          <h3 className="text-sm font-semibold text-slate-700 mb-2">
-            Direct Upstream Forms
-          </h3>
+        return (
+          <div key={provider.id} className="space-y-4 mt-6">
+            <h3 className="text-sm font-semibold text-slate-800">
+              {provider.label}
+            </h3>
 
-          <div className="border rounded-lg divide-y">
-            {/* Placeholder items */}
-            <button
-              className="w-full text-left px-4 py-2 hover:bg-slate-50 transition"
-              onClick={() => onSelect({ placeholder: true })}
-            >
-              Upstream Option #1
-            </button>
-            <button
-              className="w-full text-left px-4 py-2 hover:bg-slate-50 transition"
-              onClick={() => onSelect({ placeholder: true })}
-            >
-              Upstream Option #2
-            </button>
+            {forms.length === 0 && (
+              <p className="text-xs text-slate-500 pl-1">
+                No sources available
+              </p>
+            )}
+
+            {forms.map((form) => {
+              const expanded = expandedSource === form.id;
+              const fields = provider.getFields?.(form) || [];
+
+              return (
+                <div
+                  key={form.id}
+                  className="border border-slate-300 rounded-lg overflow-hidden"
+                >
+                  <button
+                    className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-100 transition text-slate-900"
+                    onClick={() => toggleDropdown(form.id)}
+                  >
+                    <span>{form.name}</span>
+
+                    <span
+                      className={`transition-transform ${
+                        expanded ? "rotate-90" : ""
+                      }`}
+                    >
+                      ▶
+                    </span>
+                  </button>
+
+                  {expanded && fields.length > 0 && (
+                    <div className="border-t border-slate-200">
+                      {fields.map((f) => (
+                        <button
+                          key={f.id}
+                          className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-800 text-sm"
+                          onClick={() =>
+                            onSelect({
+                              source:
+                                provider.id === "global"
+                                  ? "GLOBAL"
+                                  : "FORM_FIELD",
+                              fromFormId: form.id,
+                              fromFieldId: f.id,
+                              label: `${f.label} from ${form.name}`,
+                            })
+                          }
+                        >
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        </div>
-
-        {/* TRANSITIVE UPSTREAM SECTION */}
-        <div>
-          <h3 className="text-sm font-semibold text-slate-700 mb-2">
-            Transitive Upstream Forms
-          </h3>
-
-          <div className="border rounded-lg divide-y">
-            <button
-              className="w-full text-left px-4 py-2 hover:bg-slate-50 transition"
-              onClick={() => onSelect({ placeholder: true })}
-            >
-              Transitive Option #1
-            </button>
-          </div>
-        </div>
-
-        {/* GLOBAL SOURCES SECTION */}
-        <div>
-          <h3 className="text-sm font-semibold text-slate-700 mb-2">
-            Global Sources
-          </h3>
-
-          <div className="border rounded-lg divide-y">
-            <button
-              className="w-full text-left px-4 py-2 hover:bg-slate-50 transition"
-              onClick={() => onSelect({ placeholder: true })}
-            >
-              Global Value #1
-            </button>
-
-            <button
-              className="w-full text-left px-4 py-2 hover:bg-slate-50 transition"
-              onClick={() => onSelect({ placeholder: true })}
-            >
-              Global Value #2
-            </button>
-          </div>
-        </div>
-      </div>
+        );
+      })}
     </div>
   );
 }

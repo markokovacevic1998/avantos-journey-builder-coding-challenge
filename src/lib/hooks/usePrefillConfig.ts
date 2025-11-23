@@ -1,14 +1,9 @@
-import { useGraphContext } from "@/src/context/GraphContext";
 import { useState } from "react";
 import { FieldId, FormId } from "../domain/types";
+import { FieldPrefillConfig } from "../domain/prefill";
 
 export function usePrefillConfig() {
-  const { graph, loading, error } = useGraphContext();
   const [prefillConfig, setPrefillConfig] = useState([]);
-
-  // TODO setFieldSource
-
-  // TODO clearFieldSource
 
   function initialPrefillUpdate(formId: FormId, fields: { id: FieldId }[]) {
     setPrefillConfig((prev) => {
@@ -24,8 +19,33 @@ export function usePrefillConfig() {
       };
     });
   }
+
+  function setFieldSource(
+    formId: FormId,
+    fieldId: FieldId,
+    config: FieldPrefillConfig | null
+  ) {
+    setPrefillConfig((prev) => {
+      const formCfg = prev[formId] || {};
+
+      return {
+        ...prev,
+        [formId]: {
+          ...formCfg,
+          [fieldId]: config,
+        },
+      };
+    });
+  }
+
+  function clearFieldSource(formId: FormId, fieldId: FieldId) {
+    setFieldSource(formId, fieldId, null);
+  }
+
   return {
     prefillConfig,
     initialPrefillUpdate,
+    setFieldSource,
+    clearFieldSource,
   };
 }
