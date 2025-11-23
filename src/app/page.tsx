@@ -6,16 +6,18 @@ import { EdgesCanvas } from "../components/graph/EdgesCanvas";
 
 import { useGraphLayout } from "../lib/hooks/useGraphLayout";
 import { useGraphBounds } from "../lib/hooks/useGraphBounds";
-import { FormNode, LayoutNode } from "../lib/domain/types";
+import { FieldId, FormNode, LayoutNode } from "../lib/domain/types";
 import Modal from "../components/ui/Modal";
 import { useState } from "react";
 import { PrefillPanel } from "../components/prefill/PrefillPanel";
 import { usePrefillConfig } from "../lib/hooks/usePrefillConfig";
+import { PrefillSelector } from "../components/prefill/PrefillSelector";
 
 export default function GraphPage() {
   const { graph, loading, error } = useGraphContext();
   const [selectedNode, setSelectedNode] = useState<FormNode | null>(null);
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [selectedField, setSelectedField] = useState<FieldId | null>(null);
   const { prefillConfig, initialPrefillUpdate } = usePrefillConfig();
 
   const forms = Object.values(graph.formsById);
@@ -41,6 +43,8 @@ export default function GraphPage() {
 
   const onFormFieldClick = (fieldId: string) => {
     console.info("open modal to select prefill", fieldId);
+    setSelectedField(fieldId);
+    setActiveModal("sourceSelector");
   };
 
   const onFormFieldClear = (fieldId: string) => {
@@ -92,6 +96,18 @@ export default function GraphPage() {
             onFormFieldClick={onFormFieldClick}
             prefill={prefillConfig}
             onClear={onFormFieldClear}
+          />
+        </Modal>
+      )}
+      {activeModal === "sourceSelector" && selectedField && (
+        // TODO implement back button to drive user back to selected Node
+        <Modal onClose={closeModal}>
+          <PrefillSelector
+            field={selectedField}
+            onClose={closeModal}
+            onSelect={(source) => {
+              console.log("selected source:", source);
+            }}
           />
         </Modal>
       )}
