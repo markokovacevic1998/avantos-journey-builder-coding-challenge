@@ -6,13 +6,17 @@ import { EdgesCanvas } from "../components/graph/EdgesCanvas";
 
 import { useGraphLayout } from "../lib/hooks/useGraphLayout";
 import { useGraphBounds } from "../lib/hooks/useGraphBounds";
-import { LayoutNode } from "../lib/domain/types";
+import { FormNode, LayoutNode } from "../lib/domain/types";
 import Modal from "../components/ui/Modal";
-import { useModal } from "../context/ModalContext";
+import { useState } from "react";
+import { PrefillPanel } from "../components/prefill/PrefillPanel";
+import { usePrefillConfig } from "../lib/hooks/usePrefillConfig";
 
 export default function GraphPage() {
   const { graph, loading, error } = useGraphContext();
-  const { openModal } = useModal();
+  const [selectedNode, setSelectedNode] = useState<FormNode | null>(null);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const { prefillConfig, initialPrefillUpdate } = usePrefillConfig();
 
   const forms = Object.values(graph.formsById);
 
@@ -29,10 +33,23 @@ export default function GraphPage() {
   const offsetY =
     graphHeight / 2 - (bounds.maxY - bounds.minY) / 2 - bounds.minY;
 
-  const handleClick = (node: LayoutNode) => {
-    console.log("Clicked:", node);
+  const onNodeClick = (node: LayoutNode) => {
+    setSelectedNode(node);
+    initialPrefillUpdate(node.id, node.fields);
+    setActiveModal("prefill");
+  };
 
-    openModal("prefillFormModal");
+  const onFormFieldClick = (fieldId: string) => {
+    console.info("open modal to select prefill", fieldId);
+  };
+
+  const onFormFieldClear = (fieldId: string) => {
+    console.info("clear that form field", fieldId);
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+    setSelectedNode(null);
   };
 
   if (loading) return <div className="p-8">Loading…</div>;
@@ -64,13 +81,20 @@ export default function GraphPage() {
             nodes={layoutNodes}
             offsetX={offsetX}
             offsetY={offsetY}
-            onNodeClick={handleClick}
+            onNodeClick={onNodeClick}
           />
         </div>
       </div>
-      <Modal name="prefillFormModal">
-        <p>Modal content testing</p>
-      </Modal>
+      {activeModal === "prefill" && selectedNode && (
+        <Modal onClose={closeModal}>
+          <PrefillPanel
+            node={selectedNode}
+            onFormFieldClick={onFormFieldClick}
+            prefill={prefillConfig}
+            onClear={onFormFieldClear}
+          />
+        </Modal>
+      )}
     </div>
   );
 }
