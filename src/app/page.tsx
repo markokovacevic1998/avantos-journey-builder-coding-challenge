@@ -7,9 +7,12 @@ import { EdgesCanvas } from "../components/graph/EdgesCanvas";
 import { useGraphLayout } from "../lib/hooks/useGraphLayout";
 import { useGraphBounds } from "../lib/hooks/useGraphBounds";
 import { LayoutNode } from "../lib/domain/types";
+import Modal from "../components/ui/Modal";
+import { useModal } from "../context/ModalContext";
 
 export default function GraphPage() {
   const { graph, loading, error } = useGraphContext();
+  const { openModal } = useModal();
 
   const forms = Object.values(graph.formsById);
 
@@ -28,7 +31,8 @@ export default function GraphPage() {
 
   const handleClick = (node: LayoutNode) => {
     console.log("Clicked:", node);
-    // TODO modal open
+
+    openModal("prefillFormModal");
   };
 
   if (loading) return <div className="p-8">Loading…</div>;
@@ -64,6 +68,9 @@ export default function GraphPage() {
           />
         </div>
       </div>
+      <Modal name="prefillFormModal">
+        <p>Modal content testing</p>
+      </Modal>
     </div>
   );
 }
