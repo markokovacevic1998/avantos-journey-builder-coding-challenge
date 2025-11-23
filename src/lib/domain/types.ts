@@ -116,6 +116,18 @@ export interface FormNode {
   upstreamIds: FormId[];
   downstreamIds: FormId[];
   formDefinitionId: string;
+  position: { x: number; y: number };
+}
+
+export interface LayoutNode extends FormNode {
+  x: number;
+  y: number;
+  left: number;
+  top: number;
+  leftPortX: number;
+  leftPortY: number;
+  rightPortX: number;
+  rightPortY: number;
 }
 
 export interface ActionGraph {

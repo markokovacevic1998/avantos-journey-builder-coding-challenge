@@ -1,9 +1,16 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { getRawGraphData } from "../lib/api/getRawGraphData";
 import { cleanGraphData } from "../lib/domain/cleanGraphData";
-import { ActionGraph, FormId, FormNode } from "../lib/domain/types";
+import { ActionGraph } from "../lib/domain/types";
 
 interface GraphContextValue {
   graph: ActionGraph;
@@ -33,22 +40,37 @@ export function GraphContextProvider({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function init() {
-      const rawData = await getRawGraphData().catch((err) => setError(err));
+  const loadGraph = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const raw = await getRawGraphData();
+      const processed = cleanGraphData(raw);
+
+      setGraph(processed);
+    } catch (err: unknown) {
+      console.error("Graph load error:", err);
+
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (typeof err === "string") {
+        setError(err);
+      } else {
+        setError("Failed to load graph");
+      }
+    } finally {
       setLoading(false);
-
-      const cleanData = cleanGraphData(rawData);
-
-      setGraph(cleanData);
     }
-
-    init();
   }, []);
+
+  useEffect(() => {
+    loadGraph();
+  }, [loadGraph]);
 
   const value = useMemo(
     () => ({ graph, setGraph, loading, error }),
-    [graph, setGraph, loading, error]
+    [graph, loading, error]
   );
 
   return (
@@ -57,5 +79,11 @@ export function GraphContextProvider({
 }
 
 export const useGraphContext = () => {
-  return useContext(GraphContext);
+  const context = useContext(GraphContext);
+
+  if (!context) {
+    throw new Error("useGraphContext must be used inside GraphContextProvider");
+  }
+
+  return context;
 };

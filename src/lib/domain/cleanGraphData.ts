@@ -11,6 +11,7 @@ export function cleanGraphData(rawData: ActionBlueprintGraphDescription) {
       upstreamIds: node.data.prerequisites ?? [],
       downstreamIds: [],
       formDefinitionId: node.data.component_id,
+      position: node.position,
     };
 
     formsById[node.id] = form;
