@@ -1,9 +1,9 @@
+import { FieldPrefillConfig } from "@/src/lib/domain/prefill";
 import { Field, FormNode } from "@/src/lib/domain/types";
 
 interface PrefillPanelProps {
   node: FormNode;
-  //   prefill: Record<string, FieldPrefillConfig>;
-  prefill: Record<string, string>;
+  prefill: Record<string, FieldPrefillConfig>;
   onFormFieldClick: (fieldId: string) => void;
   onClear: (fieldId: string) => void;
 }
@@ -24,7 +24,7 @@ export function PrefillPanel({
 
       <div className="space-y-1">
         {node.fields.map((field: Field) => {
-          const config = prefill[field.id]?.source;
+          const config = prefill[field.id];
 
           return (
             <div

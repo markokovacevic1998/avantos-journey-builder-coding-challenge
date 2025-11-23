@@ -19,7 +19,12 @@ export default function GraphPage() {
   const [selectedNode, setSelectedNode] = useState<FormNode | null>(null);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [selectedField, setSelectedField] = useState<FieldId | null>(null);
-  const { prefillConfig, initialPrefillUpdate } = usePrefillConfig();
+  const {
+    prefillConfig,
+    initialPrefillUpdate,
+    setFieldSource,
+    clearFieldSource,
+  } = usePrefillConfig();
 
   const forms = Object.values(graph.formsById);
 
@@ -49,12 +54,14 @@ export default function GraphPage() {
   };
 
   const onFormFieldClear = (fieldId: string) => {
-    console.info("clear that form field", fieldId);
+    clearFieldSource(selectedNode.id, fieldId);
   };
 
   const onFieldSourceReplacement = (source: FieldPrefillConfig | null) => {
-    // TODO replace the value
-    // TODO close modal
+    if (!source || !selectedField || !selectedNode) return;
+
+    setFieldSource(selectedNode.id, selectedField, source);
+    setActiveModal("prefill");
   };
 
   const closeModal = () => {
@@ -100,20 +107,18 @@ export default function GraphPage() {
           <PrefillPanel
             node={selectedNode}
             onFormFieldClick={onFormFieldClick}
-            prefill={prefillConfig}
+            prefill={prefillConfig[selectedNode.id]}
             onClear={onFormFieldClear}
           />
         </Modal>
       )}
       {activeModal === "sourceSelector" && selectedField && selectedNode && (
         // TODO implement back button to drive user back to selected Node
-        <Modal onClose={closeModal}>
+        <Modal onClose={() => setActiveModal("prefill")}>
           <PrefillSelector
             fieldId={selectedField}
             formId={selectedNode.id}
-            onSelect={(source) => {
-              console.log("selected source:", source);
-            }}
+            onSelect={onFieldSourceReplacement}
           />
         </Modal>
       )}
