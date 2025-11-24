@@ -1,4 +1,4 @@
-import { ActionGraph, FormId, FormNode } from "./types";
+import { ActionGraph, FieldSummary, FormId, FormNode } from "./types";
 
 const upstreamCache = new Map<FormId, FormNode[]>();
 const transitiveCache = new Map<FormId, FormNode[]>();
@@ -89,4 +89,11 @@ export function getTransitiveUpstream(graph: ActionGraph, formId: FormId) {
   const directIds = new Set(directUpstream.map((f) => f.id));
 
   return allUpstream.filter((f) => !directIds.has(f.id));
+}
+
+export function toFieldSummary(form: FormNode): FieldSummary[] {
+  return form.fields.map((f) => ({
+    id: f.id,
+    label: f.label ?? f.id,
+  }));
 }

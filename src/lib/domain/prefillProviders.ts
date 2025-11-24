@@ -1,12 +1,19 @@
-import { GLOBAL_SOURCES } from "./globalSources";
-import { getDirectUpstream, getTransitiveUpstream } from "./graphUtils";
-import { ActionGraph, FormId, FormNode } from "./types";
+import { GLOBAL_FORMS } from "./globalSources";
+import {
+  getDirectUpstream,
+  getTransitiveUpstream,
+  toFieldSummary,
+} from "./graphUtils";
+import { ActionGraph, FormNode, PrefillFormNode } from "./types";
 
 export interface PrefillSourceProvider {
   id: string;
   label: string;
-  getForms(graph: ActionGraph, formId: FormId): FormNode[];
-  getFields?(form: FormNode): { id: string; label: string }[];
+  getForms: (
+    graph: ActionGraph,
+    formId: string
+  ) => PrefillFormNode[] | undefined;
+  getFields?: (form: PrefillFormNode) => { id: string; label: string }[];
 }
 
 export const directUpstreamProvider: PrefillSourceProvider = {
@@ -14,7 +21,11 @@ export const directUpstreamProvider: PrefillSourceProvider = {
   label: "Direct upstream nodes",
 
   getForms(graph, formId) {
-    return getDirectUpstream(graph, formId);
+    return getDirectUpstream(graph, formId).map((form) => ({
+      id: form.id,
+      name: form.name,
+      fields: toFieldSummary(form),
+    }));
   },
   getFields(form) {
     return form.fields.map((field) => ({
@@ -29,7 +40,11 @@ export const transitiveUpstreamProvider: PrefillSourceProvider = {
   label: "Transitive upstream nodes",
 
   getForms(graph, formId) {
-    return getTransitiveUpstream(graph, formId);
+    return getTransitiveUpstream(graph, formId)?.map((form) => ({
+      id: form.id,
+      name: form.name,
+      fields: toFieldSummary(form),
+    }));
   },
   getFields(form) {
     return form.fields.map((field) => ({
@@ -43,24 +58,9 @@ export const globalProvider: PrefillSourceProvider = {
   id: "global",
   label: "Global sources",
 
-  // Global source doesn't have forms, but we will return pseudo-form
-  getForms() {
-    return GLOBAL_SOURCES.map((src) => ({
-      id: src.id,
-      name: src.label,
-      fields: [],
-      upstreamIds: [],
-      downstreamIds: [],
-      formDefinitionId: "",
-    }));
-  },
+  getForms: () => GLOBAL_FORMS,
 
-  getFields() {
-    return GLOBAL_SOURCES.map((src) => ({
-      id: src.id,
-      label: src.label,
-    }));
-  },
+  getFields: (form) => form.fields,
 };
 
 export const prefillProviders: PrefillSourceProvider[] = [

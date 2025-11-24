@@ -109,6 +109,11 @@ export interface Field {
   type: string;
 }
 
+export interface FieldSummary {
+  id: string;
+  label: string;
+}
+
 export interface FormNode {
   id: FormId;
   name: string;
@@ -128,6 +133,12 @@ export interface LayoutNode extends FormNode {
   leftPortY: number;
   rightPortX: number;
   rightPortY: number;
+}
+
+export interface PrefillFormNode {
+  id: string;
+  name: string;
+  fields: FieldSummary[];
 }
 
 export interface ActionGraph {

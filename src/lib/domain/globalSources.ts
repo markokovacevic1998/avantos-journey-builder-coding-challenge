@@ -1,5 +1,20 @@
-export const GLOBAL_SOURCES = [
-  { id: "orgName", label: "Organization Name", source: "GLOBAL" },
-  { id: "actionDate", label: "Action Created At", source: "GLOBAL" },
-  { id: "country", label: "Default Country", source: "GLOBAL" },
+import { PrefillFormNode } from "./types";
+
+export const GLOBAL_FORMS: PrefillFormNode[] = [
+  {
+    id: "defaultUser",
+    name: "Default User",
+    fields: [
+      { id: "email", label: "Email" },
+      { id: "country", label: "Country" },
+    ],
+  },
+  {
+    id: "appSettings",
+    name: "App Settings",
+    fields: [
+      { id: "theme", label: "Theme" },
+      { id: "timezone", label: "Timezone" },
+    ],
+  },
 ];
