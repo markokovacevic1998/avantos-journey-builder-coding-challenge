@@ -1,9 +1,9 @@
 import { FieldPrefillConfig } from "@/src/lib/domain/prefill";
-import { Field, FormNode } from "@/src/lib/domain/types";
+import { Field, FieldId, FormNode } from "@/src/lib/domain/types";
 
 interface PrefillPanelProps {
   node: FormNode;
-  prefill: Record<string, FieldPrefillConfig>;
+  prefill: Record<FieldId, FieldPrefillConfig | null>;
   onFormFieldClick: (fieldId: string) => void;
   onClear: (fieldId: string) => void;
 }

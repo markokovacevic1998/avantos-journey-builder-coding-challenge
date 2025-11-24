@@ -54,6 +54,7 @@ export default function GraphPage() {
   };
 
   const onFormFieldClear = (fieldId: string) => {
+    if (!selectedNode) return;
     clearFieldSource(selectedNode.id, fieldId);
   };
 
@@ -107,7 +108,7 @@ export default function GraphPage() {
           <PrefillPanel
             node={selectedNode}
             onFormFieldClick={onFormFieldClick}
-            prefill={prefillConfig[selectedNode.id]}
+            prefill={prefillConfig[selectedNode.id] ?? {}}
             onClear={onFormFieldClear}
           />
         </Modal>
