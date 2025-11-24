@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { FieldId, FormId } from "../domain/types";
-import { FieldPrefillConfig } from "../domain/prefill";
+import {
+  FieldPrefillConfig,
+  PrefillConfigByFormId,
+} from "../domain/prefill";
 
 export function usePrefillConfig() {
-  const [prefillConfig, setPrefillConfig] = useState([]);
+  const [prefillConfig, setPrefillConfig] = useState<PrefillConfigByFormId>(
+    {}
+  );
 
   function initialPrefillUpdate(formId: FormId, fields: { id: FieldId }[]) {
     setPrefillConfig((prev) => {
       if (prev[formId]) return prev;
 
-      const fieldMap = Object.fromEntries(
-        fields.map((field) => [field.id, null])
-      );
+      const fieldMap: Record<FieldId, FieldPrefillConfig | null> =
+        Object.fromEntries(fields.map((field) => [field.id, null]));
 
       return {
         ...prev,
@@ -26,7 +30,8 @@ export function usePrefillConfig() {
     config: FieldPrefillConfig | null
   ) {
     setPrefillConfig((prev) => {
-      const formCfg = prev[formId] || {};
+      const formCfg: Record<FieldId, FieldPrefillConfig | null> =
+        prev[formId] ?? {};
 
       return {
         ...prev,

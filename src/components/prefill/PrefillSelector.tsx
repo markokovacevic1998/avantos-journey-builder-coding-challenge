@@ -1,13 +1,9 @@
 "use client";
 
 import { useGraphContext } from "@/src/context/GraphContext";
-import { GLOBAL_SOURCES } from "@/src/lib/domain/globalSources";
-import {
-  getAllUpstream,
-  getDirectUpstream,
-  getTransitiveUpstream,
-} from "@/src/lib/domain/graphUtils";
 import { prefillProviders } from "@/src/lib/domain/prefillProviders";
+import { FieldPrefillConfig } from "@/src/lib/domain/prefill";
+import { FieldId, FormId } from "@/src/lib/domain/types";
 import { useState } from "react";
 
 export function PrefillSelector({
@@ -15,9 +11,9 @@ export function PrefillSelector({
   formId,
   onSelect,
 }: {
-  fieldId: string;
-  formId: string;
-  onSelect: (item: any) => void;
+  fieldId: FieldId;
+  formId: FormId;
+  onSelect: (item: FieldPrefillConfig) => void;
 }) {
   const [expandedSource, setExpandedSource] = useState<string | null>(null);
   const { graph } = useGraphContext();
@@ -41,7 +37,7 @@ export function PrefillSelector({
       </p>
 
       {prefillProviders.map((provider) => {
-        const forms = provider.getForms(graph, formId);
+        const forms = provider.getForms(graph, formId) ?? [];
 
         return (
           <div key={provider.id} className="space-y-4 mt-6">
@@ -57,7 +53,10 @@ export function PrefillSelector({
 
             {forms.map((form) => {
               const expanded = expandedSource === form.id;
-              const fields = provider.getFields?.(form) || [];
+              const fields =
+                provider.getFields?.(form) ??
+                form.fields ??
+                [];
 
               return (
                 <div
@@ -85,17 +84,35 @@ export function PrefillSelector({
                         <button
                           key={f.id}
                           className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-800 text-sm"
-                          onClick={() =>
-                            onSelect({
-                              source:
-                                provider.id === "global"
-                                  ? "GLOBAL"
-                                  : "FORM_FIELD",
-                              fromFormId: form.id,
-                              fromFieldId: f.id,
-                              label: `${f.label} from ${form.name}`,
-                            })
-                          }
+                          onClick={() => {
+                            const providerSourceMap: Record<
+                              string,
+                              FieldPrefillConfig["source"]
+                            > = {
+                              direct: "DIRECT_UPSTREAM",
+                              transitive: "TRANSITIVE_UPSTREAM",
+                              global: "GLOBAL",
+                            };
+
+                            const sourceType =
+                              providerSourceMap[provider.id] ?? "FORM_FIELD";
+
+                            const config: FieldPrefillConfig =
+                              sourceType === "GLOBAL"
+                                ? {
+                                    source: "GLOBAL",
+                                    globalId: `${form.id}:${f.id}`,
+                                    label: `${f.label} from ${form.name}`,
+                                  }
+                                : {
+                                    source: sourceType,
+                                    fromFormId: form.id,
+                                    fromFieldId: f.id,
+                                    label: `${f.label} from ${form.name}`,
+                                  };
+
+                            onSelect(config);
+                          }}
                         >
                           {f.label}
                         </button>

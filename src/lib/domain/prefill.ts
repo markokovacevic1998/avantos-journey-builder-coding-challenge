@@ -1,3 +1,5 @@
+import { FieldId, FormId } from "./types";
+
 export type PrefillSource =
   | "FORM_FIELD"
   | "GLOBAL"
@@ -5,25 +7,23 @@ export type PrefillSource =
   | "TRANSITIVE_UPSTREAM";
 
 export interface FormFieldPrefillSource {
-  source: "FORM_FIELD";
-  fromFormId: string;
-  fromFieldId: string;
+  source: Exclude<PrefillSource, "GLOBAL">;
+  fromFormId: FormId;
+  fromFieldId: FieldId;
   label: string;
 }
 
 export interface GlobalPrefillSource {
-  source: "GLOBAL";
+  source: Extract<PrefillSource, "GLOBAL">;
   globalId: string;
   label: string;
 }
 
-export interface FieldPrefillConfig {
-  fieldId: string;
-  config: FormFieldPrefillSource | GlobalPrefillSource;
-}
+export type FieldPrefillConfig =
+  | FormFieldPrefillSource
+  | GlobalPrefillSource;
 
-export type PrefillConfigByFormId = {
-  [formId: string]: {
-    [fieldId: string]: FieldPrefillConfig;
-  };
-};
+export type PrefillConfigByFormId = Record<
+  FormId,
+  Record<FieldId, FieldPrefillConfig | null>
+>;
