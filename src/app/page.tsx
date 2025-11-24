@@ -12,7 +12,11 @@ import { useState } from "react";
 import { PrefillPanel } from "../components/prefill/PrefillPanel";
 import { usePrefillConfig } from "../lib/hooks/usePrefillConfig";
 import { PrefillSelector } from "../components/prefill/PrefillSelector";
-import { FieldPrefillConfig } from "../lib/domain/prefill";
+import {
+  FieldPrefillConfig,
+  FormFieldPrefillSource,
+  GlobalPrefillSource,
+} from "../lib/domain/prefill";
 
 export default function GraphPage() {
   const { graph, loading, error } = useGraphContext();
@@ -54,13 +58,21 @@ export default function GraphPage() {
   };
 
   const onFormFieldClear = (fieldId: string) => {
+    if (!selectedNode) return;
     clearFieldSource(selectedNode.id, fieldId);
   };
 
-  const onFieldSourceReplacement = (source: FieldPrefillConfig | null) => {
-    if (!source || !selectedField || !selectedNode) return;
+  const onFieldSourceReplacement = (
+    source: FormFieldPrefillSource | GlobalPrefillSource
+  ) => {
+    if (!selectedField || !selectedNode) return;
 
-    setFieldSource(selectedNode.id, selectedField, source);
+    const fieldPrefillConfig: FieldPrefillConfig = {
+      fieldId: selectedField,
+      config: source,
+    };
+
+    setFieldSource(selectedNode.id, selectedField, fieldPrefillConfig);
     setActiveModal("prefill");
   };
 
@@ -107,7 +119,7 @@ export default function GraphPage() {
           <PrefillPanel
             node={selectedNode}
             onFormFieldClick={onFormFieldClick}
-            prefill={prefillConfig[selectedNode.id]}
+            prefill={prefillConfig[selectedNode.id] || {}}
             onClear={onFormFieldClear}
           />
         </Modal>

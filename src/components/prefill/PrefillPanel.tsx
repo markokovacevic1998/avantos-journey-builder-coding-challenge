@@ -3,7 +3,7 @@ import { Field, FormNode } from "@/src/lib/domain/types";
 
 interface PrefillPanelProps {
   node: FormNode;
-  prefill: Record<string, FieldPrefillConfig>;
+  prefill: Record<string, FieldPrefillConfig | null>;
   onFormFieldClick: (fieldId: string) => void;
   onClear: (fieldId: string) => void;
 }
@@ -48,7 +48,9 @@ export function PrefillPanel({
                 </p>
 
                 {config ? (
-                  <p className="text-xs text-blue-600 mt-1">{config.label}</p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    {config.config.label}
+                  </p>
                 ) : (
                   <p className="text-xs text-gray-400 mt-1">No prefill set</p>
                 )}
@@ -59,7 +61,7 @@ export function PrefillPanel({
                   type="button"
                   className="text-red-500 hover:text-red-700 text-sm transition"
                   onClick={(e) => {
-                    e.stopPropagation(); // sprečava otvaranje modal-a
+                    e.stopPropagation();
                     onClear(field.id);
                   }}
                 >

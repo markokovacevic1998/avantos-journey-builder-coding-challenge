@@ -1,13 +1,11 @@
 "use client";
 
 import { useGraphContext } from "@/src/context/GraphContext";
-import { GLOBAL_SOURCES } from "@/src/lib/domain/globalSources";
-import {
-  getAllUpstream,
-  getDirectUpstream,
-  getTransitiveUpstream,
-} from "@/src/lib/domain/graphUtils";
 import { prefillProviders } from "@/src/lib/domain/prefillProviders";
+import {
+  FormFieldPrefillSource,
+  GlobalPrefillSource,
+} from "@/src/lib/domain/prefill";
 import { useState } from "react";
 
 export function PrefillSelector({
@@ -17,7 +15,7 @@ export function PrefillSelector({
 }: {
   fieldId: string;
   formId: string;
-  onSelect: (item: any) => void;
+  onSelect: (item: FormFieldPrefillSource | GlobalPrefillSource) => void;
 }) {
   const [expandedSource, setExpandedSource] = useState<string | null>(null);
   const { graph } = useGraphContext();
@@ -49,62 +47,68 @@ export function PrefillSelector({
               {provider.label}
             </h3>
 
-            {forms.length === 0 && (
+            {(!forms || !forms.length) && (
               <p className="text-xs text-slate-500 pl-1">
                 No sources available
               </p>
             )}
 
-            {forms.map((form) => {
-              const expanded = expandedSource === form.id;
-              const fields = provider.getFields?.(form) || [];
+            {forms &&
+              forms.map((form) => {
+                const expanded = expandedSource === form.id;
+                const fields = provider.getFields?.(form) || [];
 
-              return (
-                <div
-                  key={form.id}
-                  className="border border-slate-300 rounded-lg overflow-hidden"
-                >
-                  <button
-                    className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-100 transition text-slate-900"
-                    onClick={() => toggleDropdown(form.id)}
+                return (
+                  <div
+                    key={form.id}
+                    className="border border-slate-300 rounded-lg overflow-hidden"
                   >
-                    <span>{form.name}</span>
-
-                    <span
-                      className={`transition-transform ${
-                        expanded ? "rotate-90" : ""
-                      }`}
+                    <button
+                      className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-100 transition text-slate-900"
+                      onClick={() => toggleDropdown(form.id)}
                     >
-                      ▶
-                    </span>
-                  </button>
+                      <span>{form.name}</span>
 
-                  {expanded && fields.length > 0 && (
-                    <div className="border-t border-slate-200">
-                      {fields.map((f) => (
-                        <button
-                          key={f.id}
-                          className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-800 text-sm"
-                          onClick={() =>
-                            onSelect({
-                              source:
-                                provider.id === "global"
-                                  ? "GLOBAL"
-                                  : "FORM_FIELD",
-                              fromFormId: form.id,
-                              fromFieldId: f.id,
-                              label: `${f.label} from ${form.name}`,
-                            })
-                          }
-                        >
-                          {f.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                      <span
+                        className={`transition-transform ${
+                          expanded ? "rotate-90" : ""
+                        }`}
+                      >
+                        ▶
+                      </span>
+                    </button>
+
+                    {expanded && fields.length > 0 && (
+                      <div className="border-t border-slate-200">
+                        {fields.map((f) => (
+                          <button
+                            key={f.id}
+                            className="w-full text-left px-4 py-2 hover:bg-slate-100 text-slate-800 text-sm"
+                            onClick={() => {
+                              if (provider.id === "global") {
+                                onSelect({
+                                  source: "GLOBAL",
+                                  globalId: form.id,
+                                  label: `${f.label} from ${form.name}`,
+                                });
+                              } else {
+                                onSelect({
+                                  source: "FORM_FIELD",
+                                  fromFormId: form.id,
+                                  fromFieldId: f.id,
+                                  label: `${f.label} from ${form.name}`,
+                                });
+                              }
+                            }}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
           </div>
         );
       })}

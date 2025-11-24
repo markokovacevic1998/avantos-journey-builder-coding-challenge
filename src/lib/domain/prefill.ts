@@ -24,6 +24,6 @@ export interface FieldPrefillConfig {
 
 export type PrefillConfigByFormId = {
   [formId: string]: {
-    [fieldId: string]: FieldPrefillConfig;
+    [fieldId: string]: FieldPrefillConfig | null;
   };
 };
