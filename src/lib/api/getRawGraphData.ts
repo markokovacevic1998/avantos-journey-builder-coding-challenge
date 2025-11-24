@@ -1,11 +1,13 @@
-export async function getRawGraphData() {
-  // TODO put those hardcoded values in constants.js
-  const tenant_id = "123";
-  const action_blueprint_id = "bp_456";
-  const blueprint_version_id = "bpv_123";
+import {
+  API_BASE_URL,
+  TENANT_ID,
+  ACTION_BLUEPRINT_ID,
+  BLUEPRINT_VERSION_ID,
+} from "../constants";
 
+export async function getRawGraphData() {
   const result = await fetch(
-    `http://localhost:3333/api/v1/${tenant_id}/actions/blueprints/${action_blueprint_id}/${blueprint_version_id}/graph`
+    `${API_BASE_URL}/api/v1/${TENANT_ID}/actions/blueprints/${ACTION_BLUEPRINT_ID}/${BLUEPRINT_VERSION_ID}/graph`
   ).then((response) => response.json());
 
   return result;

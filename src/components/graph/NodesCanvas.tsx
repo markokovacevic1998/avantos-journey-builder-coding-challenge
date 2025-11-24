@@ -1,4 +1,5 @@
 import { LayoutNode } from "@/src/lib/domain/types";
+import { NODE_WIDTH, NODE_HEIGHT, PORT_SIZE } from "@/src/lib/constants";
 
 interface NodesCanvasProps {
   nodes: LayoutNode[];
@@ -6,11 +7,6 @@ interface NodesCanvasProps {
   offsetY: number;
   onNodeClick: (node: LayoutNode) => void;
 }
-
-// TODO put this in constants.js
-const NODE_W = 180;
-const NODE_H = 80;
-const PORT_SIZE = 12;
 
 export function NodesCanvas({
   nodes,
@@ -48,8 +44,8 @@ export function NodesCanvas({
               select-none
             "
             style={{
-              width: NODE_W,
-              height: NODE_H,
+              width: NODE_WIDTH,
+              height: NODE_HEIGHT,
               left: x,
               top: y,
             }}

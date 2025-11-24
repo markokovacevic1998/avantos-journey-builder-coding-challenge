@@ -1,14 +1,11 @@
 import { LayoutNode } from "@/src/lib/domain/types";
+import { EDGE_COLOR, EDGE_THICKNESS } from "@/src/lib/constants";
 
 interface EdgesCanvasProps {
   nodes: LayoutNode[];
   offsetX: number;
   offsetY: number;
 }
-
-// TODO put this in constants.js
-const EDGE_COLOR = "rgba(59, 130, 246, 0.6)";
-const EDGE_THICKNESS = 3;
 
 export function EdgesCanvas({ nodes, offsetX, offsetY }: EdgesCanvasProps) {
   if (!nodes.length) return null;

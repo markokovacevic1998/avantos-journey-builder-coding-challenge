@@ -125,7 +125,6 @@ export default function GraphPage() {
         </Modal>
       )}
       {activeModal === "sourceSelector" && selectedField && selectedNode && (
-        // TODO implement back button to drive user back to selected Node
         <Modal onClose={() => setActiveModal("prefill")}>
           <PrefillSelector
             fieldId={selectedField}
