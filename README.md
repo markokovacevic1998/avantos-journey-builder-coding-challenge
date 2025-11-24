@@ -1,36 +1,226 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Journey Builder - Form Dependency Graph
 
-## Getting Started
+A Next.js application for visualizing and managing form dependencies in a graph structure, with support for field prefill configuration from various sources.
 
-First, run the development server:
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+```bash
+npm install
+```
+
+### Running the Application
+
+The application requires two services to run:
+
+1. **Mock API Server** - Serves graph data
+2. **Next.js Application** - The main UI
+
+#### Option 1: Run in Separate Terminals
+
+**Terminal 1 - Mock Server:**
+
+```bash
+npm run server
+```
+
+Server runs on `http://localhost:3333`
+
+**Terminal 2 - Next.js App:**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Application runs on `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### Option 2: Use a Process Manager
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+For convenience, you can use tools like `concurrently` or `npm-run-all` to run both services simultaneously.
 
-## Learn More
+## 📁 Project Architecture
 
-To learn more about Next.js, take a look at the following resources:
+The project follows a clean, layered architecture with clear separation of concerns:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/                   # Next.js App Router pages
+│   ├── layout.tsx         # Root layout with providers
+│   └── page.tsx           # Main graph visualization page
+│
+├── components/            # React components
+│   ├── graph/             # Graph visualization components
+│   │   ├── NodesCanvas.tsx    # Renders form nodes
+│   │   └── EdgesCanvas.tsx    # Renders connections
+│   ├── prefill/           # Prefill configuration UI
+│   │   ├── PrefillPanel.tsx   # Main prefill configuration panel
+│   │   └── PrefillSelector.tsx # Source selection interface
+│   └── ui/                # Reusable UI components
+│       └── Modal.tsx      # Modal dialog component
+│
+├── context/               # React Context providers
+│   └── GraphContext.tsx   # Global graph state management
+│
+└── lib/                   # Core business logic
+    ├── api/               # API layer
+    │   └── getRawGraphData.ts  # Fetches raw graph data
+    │
+    ├── domain/            # Domain logic & types
+    │   ├── types.ts            # TypeScript type definitions
+    │   ├── cleanGraphData.ts   # Data transformation
+    │   ├── graphUtils.ts       # Graph traversal algorithms
+    │   ├── prefill.ts          # Prefill type definitions
+    │   ├── prefillProviders.ts # Provider pattern implementation
+    │   └── globalSources.ts   # Global data sources
+    │
+    └── hooks/             # Custom React hooks
+        ├── useGraphLayout.ts   # Graph layout calculations
+        ├── useGraphBounds.ts   # Bounding box calculations
+        └── usePrefillConfig.ts # Prefill state management
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Data Flow
 
-## Deploy on Vercel
+1. **Data Fetching**: `getRawGraphData()` fetches raw JSON from the API
+2. **Data Transformation**: `cleanGraphData()` transforms raw data into internal graph structure
+3. **State Management**: `GraphContext` provides global access to graph data
+4. **Visualization**: Components consume context and render the graph
+5. **User Interactions**: User actions update prefill configuration via hooks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Key Concepts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+#### Graph Structure
+
+The application models forms as nodes in a directed graph:
+
+- **Nodes**: Represent forms with fields and metadata
+- **Edges**: Represent dependencies (prerequisites) between forms
+- **Upstream**: Forms that must be completed before the current form
+- **Downstream**: Forms that depend on the current form
+
+#### Layout Algorithm
+
+The graph uses a custom layout algorithm (`useGraphLayout`) that:
+
+- Calculates node positions based on dependencies
+- Handles port positions for edge connections
+- Maintains visual hierarchy
+
+## 🔌 Provider Pattern
+
+The application uses a **Provider Pattern** to abstract different sources of prefill data. This pattern allows the system to support multiple data sources while maintaining a consistent interface.
+
+### Architecture
+
+The provider pattern is implemented in `src/lib/domain/prefillProviders.ts`:
+
+```typescript
+interface PrefillSourceProvider {
+  id: string;
+  label: string;
+  getForms: (
+    graph: ActionGraph,
+    formId: string
+  ) => PrefillFormNode[] | undefined;
+  getFields?: (form: PrefillFormNode) => { id: string; label: string }[];
+}
+```
+
+### Available Providers
+
+1. **Direct Upstream Provider** (`directUpstreamProvider`)
+   - Returns forms that are direct prerequisites of the selected form
+   - Used for immediate dependency relationships
+
+2. **Transitive Upstream Provider** (`transitiveUpstreamProvider`)
+   - Returns forms that are indirect prerequisites (prerequisites of prerequisites)
+   - Used for deeper dependency chains
+
+3. **Global Provider** (`globalProvider`)
+   - Returns global data sources (e.g., user settings, app configuration)
+   - Not tied to the graph structure
+
+### How It Works
+
+1. **Registration**: All providers are registered in the `prefillProviders` array
+2. **Selection**: `PrefillSelector` component iterates through all providers
+3. **Data Retrieval**: Each provider's `getForms()` method is called with the current graph and form ID
+4. **Field Extraction**: Provider's `getFields()` method extracts available fields from selected forms
+5. **Configuration**: User selections are stored as `FieldPrefillConfig` objects
+
+### Benefits
+
+- **Extensibility**: New data sources can be added by implementing the `PrefillSourceProvider` interface
+- **Separation of Concerns**: Each provider encapsulates its own data retrieval logic
+- **Testability**: Providers can be tested independently
+- **Flexibility**: Different providers can use different strategies (graph traversal, API calls, static data)
+
+### Example: Adding a New Provider
+
+```typescript
+export const customProvider: PrefillSourceProvider = {
+  id: "custom",
+  label: "Custom Source",
+
+  getForms(graph, formId) {
+    // Your custom logic here
+    return customForms;
+  },
+
+  getFields(form) {
+    return form.fields.map((f) => ({
+      id: f.id,
+      label: f.label || f.id,
+    }));
+  },
+};
+
+// Register it
+export const prefillProviders: PrefillSourceProvider[] = [
+  // ... existing providers
+  customProvider,
+];
+```
+
+## 🛠️ Development
+
+### Available Scripts
+
+- `npm run server` - Start Mock API server
+- `npm run dev` - Start Next.js development server
+- `npm run build` - Build production bundle
+- `npm run start` - Start production server
+- `npm run server` - Start mock API server
+- `npm run lint` - Run ESLint
+
+### TypeScript
+
+The project is fully typed with TypeScript. Type definitions are centralized in `src/lib/domain/types.ts` and `src/lib/domain/prefill.ts`.
+
+### State Management
+
+- **Global State**: React Context (`GraphContext`) for graph data
+- **Local State**: React hooks (`useState`, `usePrefillConfig`) for component-specific state
+- **Derived State**: Custom hooks for computed values (layout, bounds)
+
+## 📝 Notes
+
+- The mock server serves static JSON data from `server/graph.json`
+- Graph traversal uses memoization for performance (see `graphUtils.ts`)
+- The application uses Tailwind CSS for styling
+- All components are client-side rendered (`"use client"`)
+
+## 🤝 Contributing
+
+When adding new features:
+
+1. Follow the existing architecture patterns
+2. Add appropriate TypeScript types
+3. Update this README if architecture changes
+4. Ensure providers follow the `PrefillSourceProvider` interface
