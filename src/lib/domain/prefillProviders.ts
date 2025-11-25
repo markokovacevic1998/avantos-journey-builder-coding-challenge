@@ -4,7 +4,7 @@ import {
   getTransitiveUpstream,
   toFieldSummary,
 } from "./graphUtils";
-import { ActionGraph, FormNode, PrefillFormNode } from "./types";
+import { ActionGraph, PrefillFormNode } from "./types";
 
 export interface PrefillSourceProvider {
   id: string;
