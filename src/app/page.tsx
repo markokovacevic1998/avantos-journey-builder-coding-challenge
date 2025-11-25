@@ -86,7 +86,7 @@ export default function GraphPage() {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 to-blue-100 p-10 flex flex-col items-center">
       <h1 className="text-3xl font-bold text-slate-800 mb-10">
-        Form Dependency Graph
+        Form Dependency Graph - Avantos.ai
       </h1>
 
       <div className="relative w-full flex-1 overflow-auto">
