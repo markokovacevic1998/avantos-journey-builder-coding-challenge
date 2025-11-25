@@ -50,8 +50,6 @@ export function GraphContextProvider({
 
       setGraph(processed);
     } catch (err: unknown) {
-      console.error("Graph load error:", err);
-
       if (err instanceof Error) {
         setError(err.message);
       } else if (typeof err === "string") {
