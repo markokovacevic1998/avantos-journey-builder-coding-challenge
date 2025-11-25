@@ -2,7 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { PrefillPanel } from "../PrefillPanel";
 import { FormNode } from "@/src/lib/domain/types";
 import { FieldPrefillConfig } from "@/src/lib/domain/prefill";
-import "@testing-library/jest-dom/extend-expect";
 
 describe("PrefillPanel", () => {
   const mockNode: FormNode = {
