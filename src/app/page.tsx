@@ -52,7 +52,6 @@ export default function GraphPage() {
   };
 
   const onFormFieldClick = (fieldId: string) => {
-    console.info("open modal to select prefill", fieldId);
     setSelectedField(fieldId);
     setActiveModal("sourceSelector");
   };
