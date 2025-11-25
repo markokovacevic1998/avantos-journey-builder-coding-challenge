@@ -34,5 +34,5 @@ const server = http.createServer((req, res) => {
 
 // Start the server on port 3333
 server.listen(3333, () => {
-  console.log("Server is running on http://localhost:3333");
+  console.info("Server is running on http://localhost:3333");
 });
