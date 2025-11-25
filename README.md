@@ -196,8 +196,10 @@ export const prefillProviders: PrefillSourceProvider[] = [
 - `npm run dev` - Start Next.js development server
 - `npm run build` - Build production bundle
 - `npm run start` - Start production server
-- `npm run server` - Start mock API server
 - `npm run lint` - Run ESLint
+- `npm test` - Run tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
 
 ### TypeScript
 
@@ -216,11 +218,42 @@ The project is fully typed with TypeScript. Type definitions are centralized in 
 - The application uses Tailwind CSS for styling
 - All components are client-side rendered (`"use client"`)
 
+## 🧪 Testing
+
+The project includes comprehensive test coverage:
+
+- **Unit Tests**: Test core domain logic (`graphUtils`, `prefillProviders`, `cleanGraphData`)
+- **Hook Tests**: Test React hooks (`usePrefillConfig`)
+- **Component Tests**: Test React components (`PrefillPanel`, `PrefillSelector`)
+
+Run tests with:
+```bash
+npm test
+```
+
+Run tests in watch mode:
+```bash
+npm run test:watch
+```
+
+Generate coverage report:
+```bash
+npm run test:coverage
+```
+
+### Test Structure
+
+Tests are located alongside the code they test:
+- `src/lib/domain/__tests__/` - Domain logic tests
+- `src/lib/hooks/__tests__/` - Hook tests
+- `src/components/**/__tests__/` - Component tests
+
 ## 🤝 Contributing
 
 When adding new features:
 
 1. Follow the existing architecture patterns
 2. Add appropriate TypeScript types
-3. Update this README if architecture changes
-4. Ensure providers follow the `PrefillSourceProvider` interface
+3. Write tests for new functionality
+4. Update this README if architecture changes
+5. Ensure providers follow the `PrefillSourceProvider` interface
