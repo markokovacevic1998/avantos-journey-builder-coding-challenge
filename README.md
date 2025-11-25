@@ -2,6 +2,8 @@
 
 A Next.js application for visualizing and managing form dependencies in a graph structure, with support for field prefill configuration from various sources.
 
+This application is built as a coding challenge for the Avantos.ai.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -227,16 +229,19 @@ The project includes comprehensive test coverage:
 - **Component Tests**: Test React components (`PrefillPanel`, `PrefillSelector`)
 
 Run tests with:
+
 ```bash
 npm test
 ```
 
 Run tests in watch mode:
+
 ```bash
 npm run test:watch
 ```
 
 Generate coverage report:
+
 ```bash
 npm run test:coverage
 ```
@@ -244,6 +249,7 @@ npm run test:coverage
 ### Test Structure
 
 Tests are located alongside the code they test:
+
 - `src/lib/domain/__tests__/` - Domain logic tests
 - `src/lib/hooks/__tests__/` - Hook tests
 - `src/components/**/__tests__/` - Component tests
